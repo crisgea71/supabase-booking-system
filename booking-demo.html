@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Online Booking System Demo | Supabase Appointment Scheduling</title>
+    <meta name="description" content="Interactive online booking system demo built with Supabase. Test real-time appointment scheduling, staff availability and a client booking dashboard." />
+    <meta name="keywords" content="online booking system demo, appointment booking system, Supabase booking system, appointment scheduling, clinic booking system, salon booking system, booking dashboard" />
+    <meta name="author" content="Cristina Geafar" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://cristinageafar.com/booking-demo.html" />
+
+    <meta property="og:title" content="Online Booking System Demo | Supabase Appointment Scheduling" />
+    <meta property="og:description" content="Interactive booking system demo with services, staff availability, appointment scheduling and a client dashboard." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cristinageafar.com/booking-demo.html" />
+    <meta property="og:site_name" content="Cristina Geafar" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Online Booking System Demo | Supabase Appointment Scheduling" />
+    <meta name="twitter:description" content="Test an interactive Supabase-powered appointment booking system and client dashboard." />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Aurelle Online Booking System Demo",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "url": "https://cristinageafar.com/booking-demo.html",
+      "description": "Interactive online appointment booking system demo with service selection, staff availability, scheduling and a client dashboard.",
+      "author": {
+        "@type": "Person",
+        "name": "Cristina Geafar",
+        "url": "https://cristinageafar.com/"
+      },
+      "isAccessibleForFree": true
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #141210;
+        --panel: #1c1917;
+        --card: #211d1a;
+        --card-sel: #2a2521;
+        --ink: #f3ece0;
+        --muted: #a89f90;
+        --line: #332e28;
+        --gold: #c9a86a;
+        --gold-soft: #e6cf9e;
+        --ok-bg: #1a2a20;
+        --ok: #9fd6b0;
+        --err-bg: #2c1a18;
+        --err: #e6a79f;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      .wrap {
+        display: grid;
+        grid-template-columns: minmax(340px, 440px) minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      /* ---- CONCIERGE SIDE ---- */
+      .side {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        background: var(--panel);
+        color: var(--ink);
+        padding: 46px 42px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 40px;
+        border-right: 1px solid var(--line);
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--gold);
+      }
+      .brand {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 36px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        margin-top: 6px;
+        color: var(--gold-soft);
+      }
+      .side h1 {
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 600;
+        font-size: clamp(38px, 3.6vw, 54px);
+        line-height: 1.02;
+        letter-spacing: -0.01em;
+        margin-top: 26px;
+      }
+      .side h1 em {
+        font-style: italic;
+        color: var(--gold);
+      }
+      .side .lede {
+        margin-top: 18px;
+        max-width: 34ch;
+        color: var(--muted);
+        font-size: 14.5px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+      }
+      .chip {
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        padding: 6px 11px;
+        border: 1px solid var(--line);
+        border-radius: 100px;
+        color: var(--gold-soft);
+      }
+
+      .summary {
+        border-top: 1px solid var(--line);
+        padding-top: 22px;
+      }
+      .summary .eyebrow {
+        margin-bottom: 16px;
+      }
+      .srow {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      .srow:last-child {
+        border-bottom: 0;
+      }
+      .slabel {
+        color: var(--muted);
+      }
+      .svalue {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 19px;
+        color: var(--ink);
+        text-align: right;
+      }
+      .svalue.price {
+        color: var(--gold);
+      }
+
+      /* ---- MAIN ---- */
+      .main {
+        padding: 56px 60px 90px;
+        max-width: 920px;
+      }
+      .step {
+        padding: 0 0 40px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 40px;
+      }
+      .step:last-of-type {
+        border-bottom: 0;
+      }
+      .step-head {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+        margin-bottom: 22px;
+      }
+      .num {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 30px;
+        color: var(--gold);
+        font-weight: 600;
+        min-width: 34px;
+      }
+      .step-head h2 {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .step-head p {
+        color: var(--muted);
+        font-size: 13.5px;
+        margin-top: 2px;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .card {
+        position: relative;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px 18px;
+        cursor: pointer;
+        transition:
+          transform 0.16s ease,
+          border-color 0.16s ease,
+          background 0.16s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: var(--gold);
+      }
+      .card.sel {
+        border-color: var(--gold);
+        background: var(--card-sel);
+      }
+      .card.sel::after {
+        content: "✓";
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        width: 22px;
+        height: 22px;
+        background: var(--gold);
+        color: #141210;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .card .nm {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 21px;
+        font-weight: 600;
+      }
+      .card .mt {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 3px;
+      }
+      .card .mt b {
+        color: var(--gold);
+        font-weight: 600;
+      }
+
+      .date-field {
+        width: 100%;
+        max-width: 280px;
+        min-height: 52px;
+        padding: 0 16px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font: inherit;
+        color: var(--ink);
+        cursor: pointer;
+        color-scheme: dark;
+      }
+      .date-field:focus {
+        outline: none;
+        border-color: var(--gold);
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 13.5px;
+        margin-top: 14px;
+      }
+      .slots {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 14px;
+      }
+      .slot {
+        padding: 11px 16px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 100px;
+        color: var(--ink);
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .slot:hover {
+        border-color: var(--gold);
+      }
+      .slot.sel {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: #141210;
+        font-weight: 600;
+      }
+
+      .inputs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .inputs label {
+        display: block;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .line-input {
+        width: 100%;
+        min-height: 46px;
+        background: transparent;
+        border: 0;
+        border-bottom: 1.5px solid var(--line);
+        font-size: 16px;
+        color: var(--ink);
+        padding: 0 2px;
+      }
+      .line-input::placeholder {
+        color: #6b6357;
+      }
+      .line-input:focus {
+        outline: none;
+        border-bottom-color: var(--gold);
+      }
+
+      .book {
+        margin-top: 38px;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        flex-wrap: wrap;
+      }
+      .book-btn {
+        min-height: 60px;
+        padding: 0 40px;
+        border: 0;
+        border-radius: 100px;
+        background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+        color: #141210;
+        font-family: "Cormorant Garamond", serif;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        cursor: pointer;
+        transition:
+          transform 0.18s ease,
+          filter 0.18s ease;
+      }
+      .book-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+      }
+      .book-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .book small {
+        color: var(--muted);
+        font-size: 12.5px;
+        max-width: 34ch;
+      }
+
+      .result {
+        margin-top: 22px;
+        padding: 16px 18px;
+        border-radius: 12px;
+        font-size: 14.5px;
+        display: none;
+      }
+      .result.show {
+        display: block;
+      }
+      .result.ok {
+        background: var(--ok-bg);
+        color: var(--ok);
+        border: 1px solid #2f5340;
+      }
+      .result.err {
+        background: var(--err-bg);
+        color: var(--err);
+        border: 1px solid #5a3330;
+      }
+
+      .loading {
+        padding: 16px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 900px) {
+        .wrap {
+          grid-template-columns: 1fr;
+        }
+        .side {
+          position: static;
+          height: auto;
+          padding: 38px 28px;
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+        .side h1 {
+          max-width: 16ch;
+        }
+        .main {
+          padding: 38px 26px 70px;
+        }
+        .cards,
+        .inputs {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+
+      /* ---- PORTFOLIO DEMO NAV ---- */
+      .demo-nav {
+        position: fixed;
+        top: 18px;
+        right: 22px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .demo-badge {
+        padding: 9px 13px;
+        border-radius: 999px;
+        background: rgba(20,18,16,.88);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+      }
+      .demo-dashboard {
+        display: inline-flex;
+        align-items: center;
+        min-height: 42px;
+        padding: 0 17px;
+        border-radius: 999px;
+        border: 1px solid var(--gold);
+        background: rgba(20,18,16,.92);
+        color: var(--gold-soft);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        backdrop-filter: blur(10px);
+      }
+      .demo-dashboard:hover { background: var(--gold); color: #141210; }
+      @media (max-width: 600px) {
+        .demo-nav { top: 10px; right: 10px; }
+        .demo-badge { display: none; }
+      }
+
+    </style>
+  
+<style id="aurelle-i18n-style">
+  .aurelle-lang-switch{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:99999;
+    min-width:54px;
+    min-height:42px;
+    padding:0 14px;
+    border-radius:999px;
+    border:1px solid rgba(201,168,106,.75);
+    background:rgba(20,18,16,.92);
+    color:#e6cf9e;
+    font:700 12px/1 "Inter",system-ui,sans-serif;
+    letter-spacing:.08em;
+    cursor:pointer;
+    box-shadow:0 8px 28px rgba(0,0,0,.18);
+    backdrop-filter:blur(10px);
+  }
+  .aurelle-lang-switch:hover{filter:brightness(1.1)}
+</style>
+
+</head>
+  <body>
+
+    <div class="demo-nav">
+      <span class="demo-badge">Interactive demo</span>
+      <a class="demo-dashboard" href="dashboard-demo.html">Dashboard →</a>
+    </div>
+
+    <div class="wrap">
+      <!-- CONCIERGE -->
+      <aside class="side">
+        <div>
+          <div class="eyebrow">Salon de coafură & îngrijire</div>
+          <div class="brand">Aurelle</div>
+          <h1>Alege-ți <em>momentul</em> de răsfăț.</h1>
+          <p class="lede">
+            Spune-ne ce serviciu dorești și cu cine — îți arătăm doar orele cu
+            adevărat libere și îți confirmăm pe loc.
+          </p>
+          <div class="chips">
+            <span class="chip">Sub un minut</span>
+            <span class="chip">Fără plată acum</span>
+            <span class="chip">Confirmare instant</span>
+          </div>
+        </div>
+        <div class="summary">
+          <div class="eyebrow">Rezervarea ta</div>
+          <div class="srow">
+            <span class="slabel">Serviciu</span
+            ><span class="svalue" id="sumService">—</span>
+          </div>
+          <div class="srow">
+            <span class="slabel">Specialist</span
+            ><span class="svalue" id="sumStaff">—</span>
+          </div>
+          <div class="srow">
+            <span class="slabel">Când</span
+            ><span class="svalue" id="sumWhen">—</span>
+          </div>
+          <div class="srow">
+            <span class="slabel">Preț</span
+            ><span class="svalue price" id="sumPrice">—</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- FORM -->
+      <main class="main">
+        <div id="loading" class="loading">Se încarcă serviciile…</div>
+
+        <section class="step" id="stepService" style="display: none">
+          <div class="step-head">
+            <div class="num">01</div>
+            <div>
+              <h2>Serviciul</h2>
+              <p>Ce ți-ai dori astăzi?</p>
+            </div>
+          </div>
+          <div class="cards" id="services"></div>
+        </section>
+
+        <section class="step" id="stepStaff" style="display: none">
+          <div class="step-head">
+            <div class="num">02</div>
+            <div>
+              <h2>Specialistul</h2>
+              <p>Alege persoana cu care vrei să lucrezi.</p>
+            </div>
+          </div>
+          <div class="cards" id="staff"></div>
+        </section>
+
+        <section class="step" id="stepWhen" style="display: none">
+          <div class="step-head">
+            <div class="num">03</div>
+            <div>
+              <h2>Ziua și ora</h2>
+              <p>Îți arătăm doar intervalele libere.</p>
+            </div>
+          </div>
+          <input type="date" id="date" class="date-field" />
+          <div id="slots" class="slots"></div>
+          <div id="slotsHint" class="hint">
+            Alege serviciul, specialistul și ziua.
+          </div>
+        </section>
+
+        <section class="step" id="stepYou" style="display: none">
+          <div class="step-head">
+            <div class="num">04</div>
+            <div>
+              <h2>Datele tale</h2>
+              <p>Ca să confirmăm programarea.</p>
+            </div>
+          </div>
+          <div class="inputs">
+            <div>
+              <label for="clientName">Nume</label
+              ><input
+                id="clientName"
+                class="line-input"
+                type="text"
+                placeholder="Maria Popescu"
+                autocomplete="name"
+              />
+            </div>
+            <div>
+              <label for="clientPhone">Telefon</label
+              ><input
+                id="clientPhone"
+                class="line-input"
+                type="tel"
+                placeholder="+971 50 123 4567"
+                autocomplete="tel"
+              />
+            </div>
+          </div>
+          <div class="book">
+            <button id="bookBtn" class="book-btn" disabled>
+              Confirmă programarea
+            </button>
+            <small
+              >Datele tale sunt folosite doar pentru această programare.</small
+            >
+          </div>
+          <div id="result" class="result"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+      // ⬇️ AICI schimbi cu datele TALE
+      const SUPABASE_URL = "https://azvrnjxdhclrfnysrwvx.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "sb_publishable_2LpzSkcfeYa25jzMP7UTtg_TzQYBe7u";
+
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      const $ = (id) => document.getElementById(id);
+      const loadingEl = $("loading"),
+        servicesEl = $("services"),
+        staffEl = $("staff");
+      const dateEl = $("date"),
+        slotsEl = $("slots"),
+        slotsHintEl = $("slotsHint");
+      const nameEl = $("clientName"),
+        phoneEl = $("clientPhone"),
+        bookBtn = $("bookBtn"),
+        resultEl = $("result");
+      const sumService = $("sumService"),
+        sumStaff = $("sumStaff"),
+        sumWhen = $("sumWhen"),
+        sumPrice = $("sumPrice");
+
+      let selectedService = null,
+        selectedStaff = null,
+        selectedTime = null;
+
+      const hhmm = (t) => (t || "").slice(0, 5);
+      const toMin = (t) => {
+        const [h, m] = hhmm(t).split(":").map(Number);
+        return h * 60 + m;
+      };
+      const toTime = (min) =>
+        `${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
+
+      (function () {
+        const n = new Date();
+        dateEl.min = new Date(n.getTime() - n.getTimezoneOffset() * 60000)
+          .toISOString()
+          .split("T")[0];
+      })();
+
+      function updateSummary() {
+        sumService.textContent = selectedService ? selectedService.name : "—";
+        sumPrice.textContent = selectedService
+          ? `${selectedService.price} lei`
+          : "—";
+        sumStaff.textContent = selectedStaff ? selectedStaff.name : "—";
+        if (dateEl.value && selectedTime) {
+          const [y, m, d] = dateEl.value.split("-").map(Number);
+          const nice = new Date(y, m - 1, d).toLocaleDateString("ro-RO", {
+            weekday: "long",
+            day: "numeric",
+            month: "short",
+          });
+          sumWhen.textContent = `${nice} · ${selectedTime}`;
+        } else sumWhen.textContent = "—";
+      }
+
+      function refreshBook() {
+        updateSummary();
+        bookBtn.disabled = !(
+          selectedService &&
+          selectedStaff &&
+          dateEl.value &&
+          selectedTime &&
+          nameEl.value.trim() &&
+          phoneEl.value.trim()
+        );
+      }
+
+      async function renderSlots() {
+        selectedTime = null;
+        slotsEl.innerHTML = "";
+        if (!selectedService || !selectedStaff || !dateEl.value) {
+          slotsHintEl.textContent = "Alege serviciul, specialistul și ziua.";
+          refreshBook();
+          return;
+        }
+        const [y, m, d] = dateEl.value.split("-").map(Number);
+        const weekday = new Date(y, m - 1, d).getDay();
+        const hours = (selectedStaff.booking_staff_hours || []).filter(
+          (h) => h.weekday === weekday,
+        );
+        if (hours.length === 0) {
+          slotsHintEl.textContent = `${selectedStaff.name} nu lucrează în ziua aleasă.`;
+          refreshBook();
+          return;
+        }
+
+        slotsHintEl.textContent = "Se verifică disponibilitatea…";
+        const dayStart = new Date(y, m - 1, d, 0, 0, 0).toISOString();
+        const dayEnd = new Date(y, m - 1, d, 23, 59, 59).toISOString();
+
+        const { data: busy, error: be } = await supabase
+          .from("booking_busy_slots")
+          .select("start_time,end_time")
+          .eq("staff_id", selectedStaff.id)
+          .gte("start_time", dayStart)
+          .lte("start_time", dayEnd);
+        const { data: blocked, error: ble } = await supabase
+          .from("booking_blocked_slots")
+          .select("start_time,end_time,staff_id")
+          .lte("start_time", dayEnd)
+          .gte("end_time", dayStart);
+        if (be || ble) {
+          slotsHintEl.textContent = "Eroare: " + (be?.message || ble?.message);
+          refreshBook();
+          return;
+        }
+
+        const myBlocks = (blocked || []).filter(
+          (b) => b.staff_id === null || b.staff_id === selectedStaff.id,
+        );
+        const range = (s, e) => {
+          const sd = new Date(s),
+            ed = new Date(e);
+          return {
+            start: sd.getHours() * 60 + sd.getMinutes(),
+            end: ed.getHours() * 60 + ed.getMinutes(),
+          };
+        };
+        const taken = [
+          ...(busy || []).map((b) => range(b.start_time, b.end_time)),
+          ...myBlocks.map((b) => range(b.start_time, b.end_time)),
+        ];
+
+        const duration = selectedService.duration_minutes,
+          STEP = 15,
+          free = [];
+        hours.forEach((h) => {
+          const st = toMin(h.start_time),
+            en = toMin(h.end_time);
+          for (let s = st; s + duration <= en; s += STEP) {
+            const a = s,
+              b = s + duration;
+            if (!taken.some((r) => a < r.end && b > r.start))
+              free.push(toTime(s));
+          }
+        });
+
+        if (free.length === 0) {
+          slotsHintEl.textContent =
+            "Nu mai sunt ore libere în ziua asta. Alege altă zi.";
+          refreshBook();
+          return;
+        }
+        slotsHintEl.textContent = `${free.length} ore libere · ${duration} min`;
+        slotsEl.innerHTML = free
+          .map(
+            (t) =>
+              `<button type="button" class="slot" data-t="${t}">${t}</button>`,
+          )
+          .join("");
+        slotsEl.querySelectorAll(".slot").forEach((btn) =>
+          btn.addEventListener("click", () => {
+            slotsEl
+              .querySelectorAll(".slot")
+              .forEach((b) => b.classList.remove("sel"));
+            btn.classList.add("sel");
+            selectedTime = btn.dataset.t;
+            refreshBook();
+          }),
+        );
+      }
+
+      async function book() {
+        bookBtn.disabled = true;
+        bookBtn.textContent = "Se confirmă…";
+        resultEl.className = "result";
+        const startISO = new Date(
+          `${dateEl.value}T${selectedTime}:00`,
+        ).toISOString();
+        const endISO = new Date(
+          `${dateEl.value}T${toTime(toMin(selectedTime) + selectedService.duration_minutes)}:00`,
+        ).toISOString();
+        const { error } = await supabase
+          .from("booking_appointments")
+          .insert({
+            service_id: selectedService.id,
+            staff_id: selectedStaff.id,
+            client_name: nameEl.value.trim(),
+            client_phone: phoneEl.value.trim(),
+            start_time: startISO,
+            end_time: endISO,
+            status: "confirmed",
+          });
+        bookBtn.textContent = "Confirmă programarea";
+        if (error) {
+          resultEl.className = "result err show";
+          resultEl.textContent = "Eroare: " + error.message;
+          bookBtn.disabled = false;
+          return;
+        }
+        // Demo only: remember a sanitized copy of THIS browser's latest booking.
+        // No public SELECT permission is added to booking_appointments.
+        const demoReservation = {
+          service: selectedService.name,
+          staff: selectedStaff.name,
+          dateLabel: sumWhen.textContent,
+          price: selectedService.price,
+          clientName: nameEl.value.trim(),
+          status: "confirmed",
+          savedAt: new Date().toISOString()
+        };
+        localStorage.setItem("aurelle_demo_my_booking", JSON.stringify(demoReservation));
+
+        resultEl.className = "result ok show";
+        const nice = sumWhen.textContent;
+        resultEl.innerHTML = `Gata! Te-am programat pentru <strong>${selectedService.name}</strong> cu <strong>${selectedStaff.name}</strong>, ${nice}.<br><br><a href="dashboard-demo.html" style="color:inherit;font-weight:700">Vezi rezervarea în Dashboard →</a>`;
+        renderSlots();
+      }
+
+      async function load() {
+        const { data: services, error: se } = await supabase
+          .from("booking_services")
+          .select("*")
+          .eq("is_active", true)
+          .order("price", { ascending: true });
+        const { data: staff, error: ste } = await supabase
+          .from("booking_staff")
+          .select("*, booking_staff_hours(*)")
+          .eq("is_active", true)
+          .order("name", { ascending: true });
+        if (se || ste) {
+          loadingEl.textContent =
+            "Eroare la încărcare: " + (se?.message || ste?.message);
+          return;
+        }
+        loadingEl.style.display = "none";
+        $("stepService").style.display = "";
+        $("stepStaff").style.display = "";
+        $("stepWhen").style.display = "";
+        $("stepYou").style.display = "";
+
+        servicesEl.innerHTML = services
+          .map(
+            (s) => `<div class="card" data-id="${s.id}">
+        <div class="nm">${s.name}</div><div class="mt">${s.duration_minutes} min · <b>${s.price} lei</b></div></div>`,
+          )
+          .join("");
+        servicesEl.querySelectorAll(".card").forEach((c) =>
+          c.addEventListener("click", () => {
+            servicesEl
+              .querySelectorAll(".card")
+              .forEach((x) => x.classList.remove("sel"));
+            c.classList.add("sel");
+            selectedService = services.find((s) => s.id === c.dataset.id);
+            renderSlots();
+          }),
+        );
+
+        staffEl.innerHTML = staff
+          .map(
+            (p) => `<div class="card" data-id="${p.id}">
+        <div class="nm">${p.name}</div><div class="mt">${p.role || ""}</div></div>`,
+          )
+          .join("");
+        staffEl.querySelectorAll(".card").forEach((c) =>
+          c.addEventListener("click", () => {
+            staffEl
+              .querySelectorAll(".card")
+              .forEach((x) => x.classList.remove("sel"));
+            c.classList.add("sel");
+            selectedStaff = staff.find((p) => p.id === c.dataset.id);
+            renderSlots();
+          }),
+        );
+
+        dateEl.addEventListener("change", renderSlots);
+        nameEl.addEventListener("input", refreshBook);
+        phoneEl.addEventListener("input", refreshBook);
+        bookBtn.addEventListener("click", book);
+      }
+      load();
+    </script>
+  
+<script id="aurelle-i18n">
+(() => {
+  const STORAGE_KEY = "aurelle_lang";
+  const lang = localStorage.getItem(STORAGE_KEY) || "ro";
+  document.documentElement.lang = lang === "en" ? "en" : "ro";
+
+  const exact = new Map([
+    ["Salon de coafură & îngrijire","Hair salon & care"],
+    ["Aurelle — Programează-te","Aurelle — Book an appointment"],
+    ["Aurelle — Booking Demo","Aurelle — Booking Demo"],
+    ["Aurelle — Panou programări","Aurelle — Booking Dashboard"],
+    ["Aurelle — Dashboard Demo","Aurelle — Dashboard Demo"],
+    ["Alege-ți","Choose your"],
+    ["momentul","moment"],
+    ["de răsfăț.","of self-care."],
+    ["Spune-ne ce serviciu dorești și cu cine — îți arătăm doar orele cu adevărat libere și îți confirmăm pe loc.","Tell us which service you want and with whom — we show only genuinely available times and confirm instantly."],
+    ["Sub un minut","Under a minute"],
+    ["Fără plată acum","No payment now"],
+    ["Confirmare instant","Instant confirmation"],
+    ["Rezervarea ta","Your booking"],
+    ["Serviciu","Service"],
+    ["Serviciul","Service"],
+    ["Specialist","Specialist"],
+    ["Specialistul","Specialist"],
+    ["Când","When"],
+    ["Preț","Price"],
+    ["Se încarcă serviciile…","Loading services…"],
+    ["Ce ți-ai dori astăzi?","What would you like today?"],
+    ["Alege persoana cu care vrei să lucrezi.","Choose the person you want to book with."],
+    ["Ziua și ora","Date & time"],
+    ["Îți arătăm doar intervalele libere.","We show only available time slots."],
+    ["Alege serviciul, specialistul și ziua.","Choose a service, specialist and date."],
+    ["Datele tale","Your details"],
+    ["Ca să confirmăm programarea.","To confirm your appointment."],
+    ["Nume","Name"],
+    ["Telefon","Phone"],
+    ["Confirmă programarea","Confirm appointment"],
+    ["Datele tale sunt folosite doar pentru această programare.","Your details are used only for this appointment."],
+    ["Se verifică disponibilitatea…","Checking availability…"],
+    ["Nu mai sunt ore libere în ziua asta. Alege altă zi.","No more available times on this day. Choose another date."],
+    ["Se confirmă…","Confirming…"],
+    ["Dashboard","Dashboard"],
+    ["Interactive demo","Interactive demo"],
+    ["INTERACTIVE DEMO","INTERACTIVE DEMO"],
+    ["Vezi rezervarea în Dashboard →","View your booking in Dashboard →"],
+    ["Client Dashboard · Demo","Client Dashboard · Demo"],
+    ["Interactive portfolio demo","Interactive portfolio demo"],
+    ["Rezervarea ta","Your booking"],
+    ["Aici apare numai rezervarea făcută din acest browser. Dashboard-ul demo nu citește lista generală de programări din Supabase.","Only the booking made from this browser appears here. The demo dashboard does not read the full appointment list from Supabase."],
+    ["Nu ai încă o rezervare demo.","You don't have a demo booking yet."],
+    ["Fă mai întâi o programare în Booking Demo. După confirmare, rezervarea ta va apărea aici.","First make an appointment in Booking Demo. After confirmation, your booking will appear here."],
+    ["Fă o rezervare →","Make a booking →"],
+    ["Client","Client"],
+    ["Data","Date"],
+    ["Ora","Time"],
+    ["Status","Status"],
+    ["Confirmată","Confirmed"],
+    ["Înapoi la Booking →","Back to Booking →"],
+    ["Demo mode:","Demo mode:"],
+    ["login-ul este eliminat doar pentru această demonstrație.","login is removed only for this demonstration."],
+    ["Într-o implementare reală pentru clinică/salon, dashboard-ul staff-ului este protejat prin autentificare și politici de acces.","In a real clinic/salon deployment, the staff dashboard is protected by authentication and access policies."],
+    ["Pentru această demonstrație, browserul păstrează local doar datele necesare afișării propriei rezervări.","For this demo, the browser stores locally only the data needed to display your own booking."],
+    ["Accesul public la toate programările din baza de date rămâne blocat de RLS.","Public access to all database appointments remains blocked by RLS."],
+    ["Aurelle · Staff","Aurelle · Staff"],
+    ["Parolă","Password"],
+    ["Intră","Sign in"],
+    ["Panou programări","Booking Dashboard"],
+    ["Săptămâna curentă","Current week"],
+    ["Ieși","Sign out"],
+    ["Programări pe zi","Appointments by day"],
+    ["Săptămâna asta","This week"],
+    ["programări","appointments"],
+    ["Cea mai plină zi","Busiest day"],
+    ["Blochează","Block time"],
+    ["Pauză de masă","Lunch break"],
+    ["Blocat","Blocked"],
+    ["Scoate blocarea","Remove block"],
+    ["Barbă","Beard trim"],
+    ["Tuns","Haircut"],
+    ["Tuns + Barbă","Haircut + beard"],
+    ["Frizer","Barber"],
+    ["Coafeză","Hairstylist"],
+    ["Luni","Monday"],
+    ["Marți","Tuesday"],
+    ["Miercuri","Wednesday"],
+    ["Joi","Thursday"],
+    ["Vineri","Friday"],
+    ["Sâmbătă","Saturday"],
+    ["Duminică","Sunday"],
+    ["luni","Monday"],
+    ["marți","Tuesday"],
+    ["miercuri","Wednesday"],
+    ["joi","Thursday"],
+    ["vineri","Friday"],
+    ["sâmbătă","Saturday"],
+    ["duminică","Sunday"]
+  ]);
+
+  const monthWords = [
+    ["ianuarie","January"],["februarie","February"],["martie","March"],["aprilie","April"],
+    ["mai","May"],["iunie","June"],["iulie","July"],["august","August"],["septembrie","September"],
+    ["octombrie","October"],["noiembrie","November"],["decembrie","December"],
+    ["ian.","Jan"],["feb.","Feb"],["mar.","Mar"],["apr.","Apr"],["mai","May"],["iun.","Jun"],
+    ["iul.","Jul"],["aug.","Aug"],["sept.","Sep"],["oct.","Oct"],["nov.","Nov"],["dec.","Dec"]
+  ];
+
+  function translateString(input) {
+    if (lang !== "en" || input == null) return input;
+    let s = String(input);
+    const trimmed = s.trim();
+
+    if (exact.has(trimmed)) {
+      const before = s.slice(0, s.indexOf(trimmed));
+      const after = s.slice(s.indexOf(trimmed) + trimmed.length);
+      return before + exact.get(trimmed) + after;
+    }
+
+    s = s
+      .replace(/(\d+)\s+ore libere\s+·/gi, "$1 available slots ·")
+      .replace(/nu lucrează în ziua aleasă\./gi, "does not work on the selected day.")
+      .replace(/Login eșuat:/gi, "Login failed:")
+      .replace(/Logat:/gi, "Signed in:")
+      .replace(/Eroare la încărcare:/gi, "Loading error:")
+      .replace(/Eroare:/gi, "Error:")
+      .replace(/Gata! Te-am programat pentru/gi, "Done! You're booked for")
+      .replace(/Te așteptăm/gi, "See you soon")
+      .replace(/Blochează de la ora/gi, "Block from")
+      .replace(/Până la ora/gi, "Until")
+      .replace(/Motiv/gi, "Reason")
+      .replace(/Scoți această blocare\?/gi, "Remove this blocked time?")
+      .replace(/Săptămâna asta/gi, "This week")
+      .replace(/\bprogramări\b/gi, "appointments");
+
+    for (const [ro,en] of monthWords) {
+      s = s.replace(new RegExp("\\b" + ro.replace(".","\\.") + "\\b","gi"), en);
+    }
+    for (const [ro,en] of [
+      ["luni","Monday"],["marți","Tuesday"],["miercuri","Wednesday"],["joi","Thursday"],
+      ["vineri","Friday"],["sâmbătă","Saturday"],["duminică","Sunday"]
+    ]) {
+      s = s.replace(new RegExp("\\b"+ro+"\\b","gi"), en);
+    }
+    return s;
+  }
+
+  function translateNode(node) {
+    if (lang !== "en") return;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const parent = node.parentElement;
+      if (!parent || ["SCRIPT","STYLE","TEXTAREA"].includes(parent.tagName)) return;
+      const out = translateString(node.nodeValue);
+      if (out !== node.nodeValue) node.nodeValue = out;
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const el = node;
+    if (["SCRIPT","STYLE"].includes(el.tagName)) return;
+
+    for (const attr of ["placeholder","title","aria-label"]) {
+      if (el.hasAttribute(attr)) {
+        const v = el.getAttribute(attr);
+        el.setAttribute(attr, translateString(v));
+      }
+    }
+    for (const child of [...el.childNodes]) translateNode(child);
+  }
+
+  // Translate browser dialogs used by the staff dashboard.
+  if (lang === "en") {
+    const nativeAlert = window.alert.bind(window);
+    const nativeConfirm = window.confirm.bind(window);
+    const nativePrompt = window.prompt.bind(window);
+    window.alert = (m) => nativeAlert(translateString(m));
+    window.confirm = (m) => nativeConfirm(translateString(m));
+    window.prompt = (m, d) => nativePrompt(translateString(m), translateString(d));
+  }
+
+  function apply() {
+    if (lang !== "en") return;
+    document.title = translateString(document.title);
+    translateNode(document.body);
+  }
+
+  const switcher = document.createElement("button");
+  switcher.type = "button";
+  switcher.className = "aurelle-lang-switch";
+  switcher.textContent = lang === "en" ? "RO" : "EN";
+  switcher.setAttribute("aria-label", lang === "en" ? "Switch to Romanian" : "Switch to English");
+  switcher.addEventListener("click", () => {
+    localStorage.setItem(STORAGE_KEY, lang === "en" ? "ro" : "en");
+    location.reload();
+  });
+  document.body.appendChild(switcher);
+
+  apply();
+
+  const observer = new MutationObserver((mutations) => {
+    if (lang !== "en") return;
+    for (const m of mutations) {
+      for (const n of m.addedNodes) translateNode(n);
+      if (m.type === "characterData") translateNode(m.target);
+    }
+  });
+  observer.observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
+</script>
+
+</body>
+</html>

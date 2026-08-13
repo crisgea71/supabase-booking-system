@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurelle — Dashboard Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#fff7ed; --surface:#fff; --ink:#2a2f36; --muted:#8a8f98;
+      --line:#f2e6d6; --coral:#ff7a59; --coral-d:#ef5f3c;
+      --teal:#0fb0a4; --mint:#e9f8f2; --mint-line:#bfe9db;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"Inter",system-ui,sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; }
+    .shell { max-width:1050px; margin:0 auto; padding:28px 22px 70px; }
+    .top { display:flex; align-items:center; gap:14px; margin-bottom:42px; flex-wrap:wrap; }
+    .logo { width:44px; height:44px; border-radius:13px; display:grid; place-items:center;
+      color:#fff; font-family:"Fraunces",serif; font-weight:600;
+      background:linear-gradient(135deg,var(--coral),#f7b32b); }
+    .brand { margin-right:auto; }
+    .brand h1 { font-family:"Fraunces",serif; font-size:1.35rem; }
+    .brand small { color:var(--muted); }
+    .back { text-decoration:none; color:var(--coral-d); background:#fff; border:1px solid var(--line);
+      border-radius:999px; padding:11px 16px; font-weight:700; }
+    .notice { margin-bottom:28px; padding:13px 16px; border:1px solid var(--line); background:#fff;
+      border-radius:14px; color:var(--muted); font-size:13px; line-height:1.55; }
+    .notice strong { color:var(--ink); }
+    .eyebrow { color:var(--coral-d); text-transform:uppercase; letter-spacing:.14em; font-size:11px; font-weight:700; }
+    .hero h2 { font-family:"Fraunces",serif; font-size:clamp(32px,5vw,52px); margin:8px 0 10px; }
+    .hero p { color:var(--muted); max-width:680px; line-height:1.6; }
+    .card { margin-top:28px; background:var(--surface); border-radius:22px; padding:26px;
+      box-shadow:0 18px 45px rgba(255,122,89,.10); border:1px solid var(--line); }
+    .status-pill { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+      background:var(--mint); border:1px solid var(--mint-line); color:#0b6b63; font-size:13px; font-weight:700; }
+    .dot { width:8px; height:8px; border-radius:50%; background:var(--teal); }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-top:22px; }
+    .item { padding:18px; border:1px solid var(--line); border-radius:15px; background:#fffdf9; }
+    .item span { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-size:10px; margin-bottom:7px; }
+    .item strong { font-family:"Fraunces",serif; font-size:20px; font-weight:600; }
+    .privacy { margin-top:20px; color:var(--muted); font-size:13px; line-height:1.55; }
+    .empty { margin-top:28px; padding:30px; background:#fff; border:1px solid var(--line); border-radius:20px; }
+    .empty h3 { font-family:"Fraunces",serif; font-size:25px; margin-bottom:8px; }
+    .empty p { color:var(--muted); line-height:1.6; margin-bottom:18px; }
+    .primary { display:inline-flex; text-decoration:none; padding:12px 18px; border-radius:999px;
+      background:linear-gradient(135deg,var(--coral),var(--coral-d)); color:#fff; font-weight:700; }
+    @media(max-width:650px) { .grid{grid-template-columns:1fr} .shell{padding:18px 15px 50px} }
+  </style>
+
+<style id="aurelle-i18n-style">
+  .aurelle-lang-switch{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:99999;
+    min-width:54px;
+    min-height:42px;
+    padding:0 14px;
+    border-radius:999px;
+    border:1px solid rgba(201,168,106,.75);
+    background:rgba(20,18,16,.92);
+    color:#e6cf9e;
+    font:700 12px/1 "Inter",system-ui,sans-serif;
+    letter-spacing:.08em;
+    cursor:pointer;
+    box-shadow:0 8px 28px rgba(0,0,0,.18);
+    backdrop-filter:blur(10px);
+  }
+  .aurelle-lang-switch:hover{filter:brightness(1.1)}
+</style>
+
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div class="logo">A</div>
+      <div class="brand"><h1>Aurelle</h1><small>Client Dashboard · Demo</small></div>
+      <a class="back" href="booking-demo.html">← Booking</a>
+    </header>
+
+    <div class="notice">
+      <strong>Demo mode:</strong> login-ul este eliminat doar pentru această demonstrație.
+      Într-o implementare reală pentru clinică/salon, dashboard-ul staff-ului este protejat prin autentificare și politici de acces.
+    </div>
+
+    <section class="hero">
+      <span class="eyebrow">Interactive portfolio demo</span>
+      <h2>Rezervarea ta</h2>
+      <p>Aici apare numai rezervarea făcută din acest browser. Dashboard-ul demo nu citește lista generală de programări din Supabase.</p>
+    </section>
+
+    <div id="view"></div>
+  </main>
+
+  <script>
+    const view = document.getElementById("view");
+
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+    })[c]);
+
+    let booking = null;
+    try {
+      booking = JSON.parse(localStorage.getItem("aurelle_demo_my_booking") || "null");
+    } catch (_) {}
+
+    if (!booking) {
+      view.innerHTML = `
+        <div class="empty">
+          <h3>Nu ai încă o rezervare demo.</h3>
+          <p>Fă mai întâi o programare în Booking Demo. După confirmare, rezervarea ta va apărea aici.</p>
+          <a class="primary" href="booking-demo.html">Fă o rezervare →</a>
+        </div>`;
+    } else {
+      view.innerHTML = `
+        <section class="card">
+          <div class="status-pill"><span class="dot"></span>Confirmată</div>
+          <div class="grid">
+            <div class="item"><span>Client</span><strong>${esc(booking.clientName)}</strong></div>
+            <div class="item"><span>Serviciu</span><strong>${esc(booking.service)}</strong></div>
+            <div class="item"><span>Specialist</span><strong>${esc(booking.staff)}</strong></div>
+            <div class="item"><span>Când</span><strong>${esc(booking.dateLabel)}</strong></div>
+            <div class="item"><span>Preț</span><strong>${booking.price != null ? esc(booking.price) + " lei" : "—"}</strong></div>
+            <div class="item"><span>Status</span><strong>Confirmată</strong></div>
+          </div>
+          <p class="privacy">
+            Pentru această demonstrație, browserul păstrează local doar datele necesare afișării propriei rezervări.
+            Accesul public la toate programările din baza de date rămâne blocat de RLS.
+          </p>
+        </section>`;
+    }
+  </script>
+
+<script id="aurelle-i18n">
+(() => {
+  const STORAGE_KEY = "aurelle_lang";
+  const lang = localStorage.getItem(STORAGE_KEY) || "ro";
+  document.documentElement.lang = lang === "en" ? "en" : "ro";
+
+  const exact = new Map([
+    ["Salon de coafură & îngrijire","Hair salon & care"],
+    ["Aurelle — Programează-te","Aurelle — Book an appointment"],
+    ["Aurelle — Booking Demo","Aurelle — Booking Demo"],
+    ["Aurelle — Panou programări","Aurelle — Booking Dashboard"],
+    ["Aurelle — Dashboard Demo","Aurelle — Dashboard Demo"],
+    ["Alege-ți","Choose your"],
+    ["momentul","moment"],
+    ["de răsfăț.","of self-care."],
+    ["Spune-ne ce serviciu dorești și cu cine — îți arătăm doar orele cu adevărat libere și îți confirmăm pe loc.","Tell us which service you want and with whom — we show only genuinely available times and confirm instantly."],
+    ["Sub un minut","Under a minute"],
+    ["Fără plată acum","No payment now"],
+    ["Confirmare instant","Instant confirmation"],
+    ["Rezervarea ta","Your booking"],
+    ["Serviciu","Service"],
+    ["Serviciul","Service"],
+    ["Specialist","Specialist"],
+    ["Specialistul","Specialist"],
+    ["Când","When"],
+    ["Preț","Price"],
+    ["Se încarcă serviciile…","Loading services…"],
+    ["Ce ți-ai dori astăzi?","What would you like today?"],
+    ["Alege persoana cu care vrei să lucrezi.","Choose the person you want to book with."],
+    ["Ziua și ora","Date & time"],
+    ["Îți arătăm doar intervalele libere.","We show only available time slots."],
+    ["Alege serviciul, specialistul și ziua.","Choose a service, specialist and date."],
+    ["Datele tale","Your details"],
+    ["Ca să confirmăm programarea.","To confirm your appointment."],
+    ["Nume","Name"],
+    ["Telefon","Phone"],
+    ["Confirmă programarea","Confirm appointment"],
+    ["Datele tale sunt folosite doar pentru această programare.","Your details are used only for this appointment."],
+    ["Se verifică disponibilitatea…","Checking availability…"],
+    ["Nu mai sunt ore libere în ziua asta. Alege altă zi.","No more available times on this day. Choose another date."],
+    ["Se confirmă…","Confirming…"],
+    ["Dashboard","Dashboard"],
+    ["Interactive demo","Interactive demo"],
+    ["INTERACTIVE DEMO","INTERACTIVE DEMO"],
+    ["Vezi rezervarea în Dashboard →","View your booking in Dashboard →"],
+    ["Client Dashboard · Demo","Client Dashboard · Demo"],
+    ["Interactive portfolio demo","Interactive portfolio demo"],
+    ["Rezervarea ta","Your booking"],
+    ["Aici apare numai rezervarea făcută din acest browser. Dashboard-ul demo nu citește lista generală de programări din Supabase.","Only the booking made from this browser appears here. The demo dashboard does not read the full appointment list from Supabase."],
+    ["Nu ai încă o rezervare demo.","You don't have a demo booking yet."],
+    ["Fă mai întâi o programare în Booking Demo. După confirmare, rezervarea ta va apărea aici.","First make an appointment in Booking Demo. After confirmation, your booking will appear here."],
+    ["Fă o rezervare →","Make a booking →"],
+    ["Client","Client"],
+    ["Data","Date"],
+    ["Ora","Time"],
+    ["Status","Status"],
+    ["Confirmată","Confirmed"],
+    ["Înapoi la Booking →","Back to Booking →"],
+    ["Demo mode:","Demo mode:"],
+    ["login-ul este eliminat doar pentru această demonstrație.","login is removed only for this demonstration."],
+    ["Într-o implementare reală pentru clinică/salon, dashboard-ul staff-ului este protejat prin autentificare și politici de acces.","In a real clinic/salon deployment, the staff dashboard is protected by authentication and access policies."],
+    ["Pentru această demonstrație, browserul păstrează local doar datele necesare afișării propriei rezervări.","For this demo, the browser stores locally only the data needed to display your own booking."],
+    ["Accesul public la toate programările din baza de date rămâne blocat de RLS.","Public access to all database appointments remains blocked by RLS."],
+    ["Aurelle · Staff","Aurelle · Staff"],
+    ["Parolă","Password"],
+    ["Intră","Sign in"],
+    ["Panou programări","Booking Dashboard"],
+    ["Săptămâna curentă","Current week"],
+    ["Ieși","Sign out"],
+    ["Programări pe zi","Appointments by day"],
+    ["Săptămâna asta","This week"],
+    ["programări","appointments"],
+    ["Cea mai plină zi","Busiest day"],
+    ["Blochează","Block time"],
+    ["Pauză de masă","Lunch break"],
+    ["Blocat","Blocked"],
+    ["Scoate blocarea","Remove block"],
+    ["Barbă","Beard trim"],
+    ["Tuns","Haircut"],
+    ["Tuns + Barbă","Haircut + beard"],
+    ["Frizer","Barber"],
+    ["Coafeză","Hairstylist"],
+    ["Luni","Monday"],
+    ["Marți","Tuesday"],
+    ["Miercuri","Wednesday"],
+    ["Joi","Thursday"],
+    ["Vineri","Friday"],
+    ["Sâmbătă","Saturday"],
+    ["Duminică","Sunday"],
+    ["luni","Monday"],
+    ["marți","Tuesday"],
+    ["miercuri","Wednesday"],
+    ["joi","Thursday"],
+    ["vineri","Friday"],
+    ["sâmbătă","Saturday"],
+    ["duminică","Sunday"]
+  ]);
+
+  const monthWords = [
+    ["ianuarie","January"],["februarie","February"],["martie","March"],["aprilie","April"],
+    ["mai","May"],["iunie","June"],["iulie","July"],["august","August"],["septembrie","September"],
+    ["octombrie","October"],["noiembrie","November"],["decembrie","December"],
+    ["ian.","Jan"],["feb.","Feb"],["mar.","Mar"],["apr.","Apr"],["mai","May"],["iun.","Jun"],
+    ["iul.","Jul"],["aug.","Aug"],["sept.","Sep"],["oct.","Oct"],["nov.","Nov"],["dec.","Dec"]
+  ];
+
+  function translateString(input) {
+    if (lang !== "en" || input == null) return input;
+    let s = String(input);
+    const trimmed = s.trim();
+
+    if (exact.has(trimmed)) {
+      const before = s.slice(0, s.indexOf(trimmed));
+      const after = s.slice(s.indexOf(trimmed) + trimmed.length);
+      return before + exact.get(trimmed) + after;
+    }
+
+    s = s
+      .replace(/(\d+)\s+ore libere\s+·/gi, "$1 available slots ·")
+      .replace(/nu lucrează în ziua aleasă\./gi, "does not work on the selected day.")
+      .replace(/Login eșuat:/gi, "Login failed:")
+      .replace(/Logat:/gi, "Signed in:")
+      .replace(/Eroare la încărcare:/gi, "Loading error:")
+      .replace(/Eroare:/gi, "Error:")
+      .replace(/Gata! Te-am programat pentru/gi, "Done! You're booked for")
+      .replace(/Te așteptăm/gi, "See you soon")
+      .replace(/Blochează de la ora/gi, "Block from")
+      .replace(/Până la ora/gi, "Until")
+      .replace(/Motiv/gi, "Reason")
+      .replace(/Scoți această blocare\?/gi, "Remove this blocked time?")
+      .replace(/Săptămâna asta/gi, "This week")
+      .replace(/\bprogramări\b/gi, "appointments");
+
+    for (const [ro,en] of monthWords) {
+      s = s.replace(new RegExp("\\b" + ro.replace(".","\\.") + "\\b","gi"), en);
+    }
+    for (const [ro,en] of [
+      ["luni","Monday"],["marți","Tuesday"],["miercuri","Wednesday"],["joi","Thursday"],
+      ["vineri","Friday"],["sâmbătă","Saturday"],["duminică","Sunday"]
+    ]) {
+      s = s.replace(new RegExp("\\b"+ro+"\\b","gi"), en);
+    }
+    return s;
+  }
+
+  function translateNode(node) {
+    if (lang !== "en") return;
+    if (node.nodeType === Node.TEXT_NODE) {
+      const parent = node.parentElement;
+      if (!parent || ["SCRIPT","STYLE","TEXTAREA"].includes(parent.tagName)) return;
+      const out = translateString(node.nodeValue);
+      if (out !== node.nodeValue) node.nodeValue = out;
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const el = node;
+    if (["SCRIPT","STYLE"].includes(el.tagName)) return;
+
+    for (const attr of ["placeholder","title","aria-label"]) {
+      if (el.hasAttribute(attr)) {
+        const v = el.getAttribute(attr);
+        el.setAttribute(attr, translateString(v));
+      }
+    }
+    for (const child of [...el.childNodes]) translateNode(child);
+  }
+
+  // Translate browser dialogs used by the staff dashboard.
+  if (lang === "en") {
+    const nativeAlert = window.alert.bind(window);
+    const nativeConfirm = window.confirm.bind(window);
+    const nativePrompt = window.prompt.bind(window);
+    window.alert = (m) => nativeAlert(translateString(m));
+    window.confirm = (m) => nativeConfirm(translateString(m));
+    window.prompt = (m, d) => nativePrompt(translateString(m), translateString(d));
+  }
+
+  function apply() {
+    if (lang !== "en") return;
+    document.title = translateString(document.title);
+    translateNode(document.body);
+  }
+
+  const switcher = document.createElement("button");
+  switcher.type = "button";
+  switcher.className = "aurelle-lang-switch";
+  switcher.textContent = lang === "en" ? "RO" : "EN";
+  switcher.setAttribute("aria-label", lang === "en" ? "Switch to Romanian" : "Switch to English");
+  switcher.addEventListener("click", () => {
+    localStorage.setItem(STORAGE_KEY, lang === "en" ? "ro" : "en");
+    location.reload();
+  });
+  document.body.appendChild(switcher);
+
+  apply();
+
+  const observer = new MutationObserver((mutations) => {
+    if (lang !== "en") return;
+    for (const m of mutations) {
+      for (const n of m.addedNodes) translateNode(n);
+      if (m.type === "characterData") translateNode(m.target);
+    }
+  });
+  observer.observe(document.body, {childList:true, subtree:true, characterData:true});
+})();
+</script>
+
+</body>
+</html>
